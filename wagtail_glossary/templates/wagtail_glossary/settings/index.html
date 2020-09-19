@@ -1,0 +1,26 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}{% trans "glossaries" %}{% endblock %}
+{% block extra_js %}
+    {{ block.super }}
+    <script>
+        window.headerSearch = {
+            url: "{% url 'wagtail_glossary_settings:index' %}",
+            termInput: "#id_q",
+            targetOutput: "#glossary-results"
+        }
+    </script>
+{% endblock %}
+
+{% block content %}
+    {% trans "glossaries" as glossaries_str %}
+    {% trans "Add a glossary" as add_str %}
+    {% url "wagtail_glossary_settings:add" as add_link %}
+    {% include "wagtailadmin/shared/header.html" with title=glossaries_str action_url=add_link action_text=add_str icon="group" search_url="wagtailusers_groups:index" %}
+
+    <div class="nice-padding">
+        <div id="group-results" class="groups">
+            {% include "wagtail_glossary/settings/results.html" %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% load i18n %}
+
+{% if glossaries %}
+    {% include "wagtail_glossary/settings/list.html" %}
+
+    {% include "wagtailadmin/shared/pagination_nav.html" with items=page_obj linkurl="wagtail_glossary_settings:index" %}
+{% elif is_searching %}
+    <p role="alert">{% blocktrans with query=search_form.q.value %}Sorry, no glossaries match "{{ query }}"{% endblocktrans %}</p>
+{% else %}
+    {% url 'wagtail_glossary_settings:add' as add_glossary_url %}
+    <p>{% blocktrans %}There are no glossaries yet. Why not <a href="{{ add_glossary_url }}">add one</a>?{% endblocktrans %}</p>
+{% endif %}

@@ -1,0 +1,24 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n %}
+{% block titletag %}{% trans "Delete glossary" %}{% endblock %}
+
+{% block content %}
+    {% trans "Delete glossary" as del_str %}
+    {% include "wagtailadmin/shared/header.html" with title=del_str subtitle=glossary.name icon="group" %}
+
+    <div class="nice-padding">
+        <p>
+            {% blocktrans with glossary_name=glossary.name count glossary_definition_count=glossary.definitions.count %}
+                The glossary '{{ glossary_name }}' has <strong>{{ glossary_definition_count }}</strong> definition.
+            {% plural %}
+                The glossary '{{ glossary_name }}' has <strong>{{ glossary_definition_count }}</strong> definitions.
+            {% endblocktrans %}
+        </p>
+
+        <p>{% trans "Are you sure you want to delete this glossary?" %}</p>
+        <form action="{% url 'wagtail_glossary_settings:delete' glossary.id %}" method="POST">
+            {% csrf_token %}
+            <input type="submit" value="{% trans 'Yes, delete' %}" class="button serious" />
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "wagtailadmin/base.html" %}
+{% load wagtailusers_tags wagtailimages_tags wagtailadmin_tags i18n %}
+
+{% block titletag %}{% trans "Add glossary" %}{% endblock %}
+
+{% block content %}
+
+    {% trans "Add glossary" as add_glossary_str %}
+    {% include "wagtailadmin/shared/header.html" with title=add_glossary_str icon="group" %}
+
+    <div class="nice-padding">
+        <form action="{% url 'wagtail_glossary_settings:add' %}" method="POST" novalidate>
+            {% csrf_token %}
+
+            <ul class="fields">
+                {% for field in form %}
+                    {% include "wagtailadmin/shared/field_as_li.html" with field=field %}
+                {% endfor %}
+                <li><input type="submit" value='{% trans "Add glossary" %}' class="button" /></li>
+            </ul>
+        </form>
+    </div>
+{% endblock %}
