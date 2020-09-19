@@ -1,0 +1,13 @@
+*.pyc
+/build
+/dist
+/wagtail_glossary.egg-info
+/.coverage
+/htmlcov
+/.tox
+/venv
+/.vscode
+/site
+/test_wagtailglossary.db
+/wagtail_glossary/static/wagtail_glossary/js/wagtail-glossary.js
+/node_modules
