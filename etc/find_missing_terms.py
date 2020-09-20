@@ -6,14 +6,17 @@ TODO: Convert into a management command
 
 import string
 import re
+from collections import Counter
 
 import enchant
 from wagtail.core.models import Page
 from wagtail_localize.segments.extract import extract_segments
 from wagtail_localize.segments.types import StringSegmentValue
+from wagtail_glossary.models import DefinitonTerm
 
 
 def is_number(text):
+    text = ''.join(c for c in text if c != '.' and c != ',').lstrip('$€£').rstrip('k')
     try:
         int(text)
         return True
@@ -24,14 +27,10 @@ def is_number(text):
         return False
 
 
-SPLIT_RE = re.compile(r'[\s\.\,\[\]\(\)\!\?]')
-EMAIL_RE = re.compile(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$')
-URL_RE = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
-
 def extract_terms_from_text(text):
-    terms = SPLIT_RE.split(text)
-    terms = [term.strip(string.punctuation) for term in terms]
-    return [term for term in terms if term and not is_number(term) and not EMAIL_RE.match(term) and not URL_RE.match(term)]
+    terms = text.split()
+    terms = [term.strip(string.punctuation + "‘") for term in terms]
+    return [term for term in terms if term and not is_number(term)]
 
 
 def extract_terms(instance):
@@ -49,22 +48,26 @@ def term_in_dictionary(d, term):
     if d.check(term):
         return True
 
-    if Definition.objects.filter(term__iexact=term + '\n').exists():
+    if DefinitonTerm.objects.filter(term__iexact=term).exists():
         return True
 
-    if '-' in term:
-        parts = term.split('-')
-        if len(parts) == 2:
-            return term_in_dictionary(d, parts[0]) and term_in_dictionary(d, parts[1])
+    if term.lower().endswith("'s"):
+        return term_in_dictionary(d, term[:-2])
 
     return False
 
 
 def find_missing_terms():
+    counter = Counter()
     for page in Page.objects.all().specific():
+        print(page.url)
         d = enchant.Dict(page.locale.language_code)
         terms_by_field = extract_terms(page)
         for field, terms in terms_by_field.items():
             for i, term in enumerate(terms):
                 if not term_in_dictionary(d, term):
-                    print(page.url, field, i, term)
+                    #print(page.url, field, i, term)
+                    counter[term.lower()] += 1
+
+    for word, count in counter.most_common(50):
+        print(word, count)
