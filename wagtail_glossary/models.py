@@ -15,7 +15,7 @@ class GlossaryManager(models.Manager):
         return self.get(slug=slug)
 
 
-class Glossary(index.Indexed, models.Model):
+class Glossary(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
     locale = models.ForeignKey(Locale, on_delete=models.CASCADE)
@@ -25,12 +25,6 @@ class Glossary(index.Indexed, models.Model):
 
     class Meta:
         verbose_name_plural = "glossaries"
-
-    search_fields = [
-        index.SearchField("name"),
-        index.AutocompleteField("name"),
-        index.FilterField("language_code"),
-    ]
 
     def natural_key(self):
         return self.slug
@@ -46,6 +40,9 @@ class Definition(index.Indexed, ClusterableModel):
 
     search_fields = [
         index.FilterField("glossary"),
+        index.RelatedFields("glossary", [
+            index.FilterField("locale"),
+        ]),
         index.RelatedFields("terms", [
             index.SearchField("term"),
             index.AutocompleteField("term"),
