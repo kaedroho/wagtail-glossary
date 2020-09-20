@@ -60,6 +60,7 @@ class Definition(index.Indexed, ClusterableModel):
         return f"{', '.join(terms)}"
 
 
+# FIXME spelling
 class DefinitonTerm(models.Model):
     definition = ParentalKey(Definition, on_delete=models.CASCADE, related_name="terms")
     term = models.CharField(max_length=50)
