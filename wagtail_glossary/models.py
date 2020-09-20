@@ -2,7 +2,7 @@ from django.db import models
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
-from wagtail.core.models import Locale, TranslatableMixin
+from wagtail.core.models import Locale
 from wagtail.search import index
 from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
@@ -16,7 +16,7 @@ class GlossaryManager(models.Manager):
 class Glossary(index.Indexed, models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True)
-    language_code = models.CharField(max_length=10)
+    locale = models.ForeignKey(Locale, on_delete=models.CASCADE)
     editable = models.BooleanField(default=True)
 
     objects = GlossaryManager()
