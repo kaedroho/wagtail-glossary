@@ -56,6 +56,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='definitonterm',
-            constraint=models.UniqueConstraint(condition=models.Q(caninical=True), fields=('definition',), name='one_canonical_per_definition'),
+            constraint=models.UniqueConstraint(condition=models.Q(canonical=True), fields=('definition',), name='one_canonical_per_definition'),
         ),
     ]

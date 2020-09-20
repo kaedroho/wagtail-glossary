@@ -68,5 +68,5 @@ class DefinitonTerm(models.Model):
     class Meta:
         constraints = [
             # Allow one canonical term per definition
-            UniqueConstraint(fields=['definition'], name='one_canonical_per_definition', condition=Q(caninical=True)),
+            UniqueConstraint(fields=['definition'], name='one_canonical_per_definition', condition=Q(canonical=True)),
         ]
