@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import Q
+from django.db.models.constraints import UniqueConstraint
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
@@ -40,14 +42,11 @@ class Glossary(index.Indexed, models.Model):
 @register_snippet
 class Definition(index.Indexed, ClusterableModel):
     glossary = models.ForeignKey(Glossary, on_delete=models.CASCADE, related_name="definitions")
-    term = models.CharField(max_length=50, db_index=True)
     definition = models.TextField(blank=True)
 
     search_fields = [
         index.FilterField("glossary"),
-        index.SearchField("term"),
-        index.AutocompleteField("term"),
-        index.RelatedFields("alternate_terms", [
+        index.RelatedFields("terms", [
             index.SearchField("term"),
             index.AutocompleteField("term"),
         ]),
@@ -55,17 +54,22 @@ class Definition(index.Indexed, ClusterableModel):
 
     panels = [
         FieldPanel("glossary"),
-        FieldPanel("term"),
-        InlinePanel("alternate_terms", label="Alternate terms", help_text="For example: nicknames, acronyms, common mis-spellings"),
+        InlinePanel("terms", label="Terms"),
         FieldPanel("definition"),
     ]
 
     def __str__(self):
-        terms = [self.term]
-        terms.extend(self.alternate_terms.all().values_list("term", flat=True)[:5])
-        return f"Definition of: {', '.join(terms)}"
+        terms = self.terms.all().values_list("term", flat=True)[:5]
+        return f"{', '.join(terms)}"
 
 
-class DefinitonAlternateTerm(models.Model):
-    definition = ParentalKey(Definition, on_delete=models.CASCADE, related_name="alternate_terms")
+class DefinitonTerm(models.Model):
+    definition = ParentalKey(Definition, on_delete=models.CASCADE, related_name="terms")
     term = models.CharField(max_length=50)
+    canonical = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            # Allow one canonical term per definition
+            UniqueConstraint(fields=['definition'], name='one_canonical_per_definition', condition=Q(caninical=True)),
+        ]
