@@ -8,7 +8,6 @@ from wagtail.snippets.edit_handlers import SnippetChooserPanel
 from wagtail.snippets.models import register_snippet
 
 
-
 class GlossaryManager(models.Manager):
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
@@ -48,7 +47,7 @@ class Definition(index.Indexed, ClusterableModel):
         index.FilterField("glossary"),
         index.SearchField("term"),
         index.AutocompleteField("term"),
-        index.RelatedFields("term_variations", [
+        index.RelatedFields("alternate_terms", [
             index.SearchField("term"),
             index.AutocompleteField("term"),
         ]),
@@ -57,16 +56,16 @@ class Definition(index.Indexed, ClusterableModel):
     panels = [
         FieldPanel("glossary"),
         FieldPanel("term"),
-        InlinePanel("term_variations", label="Term variations", help_text="For example: nicknames, acronyms, common mis-spellings"),
+        InlinePanel("alternate_terms", label="Alternate terms", help_text="For example: nicknames, acronyms, common mis-spellings"),
         FieldPanel("definition"),
     ]
 
     def __str__(self):
         terms = [self.term]
-        terms.extend(self.term_variations.all().values_list("term", flat=True)[:5])
+        terms.extend(self.alternate_terms.all().values_list("term", flat=True)[:5])
         return f"Definition of: {', '.join(terms)}"
 
 
-class DefinitonTermVariation(models.Model):
-    definition = ParentalKey(Definition, on_delete=models.CASCADE, related_name="term_variations")
+class DefinitonAlternateTerm(models.Model):
+    definition = ParentalKey(Definition, on_delete=models.CASCADE, related_name="alternate_terms")
     term = models.CharField(max_length=50)
